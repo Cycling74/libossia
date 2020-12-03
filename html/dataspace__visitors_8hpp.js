@@ -1,0 +1,27 @@
+var dataspace__visitors_8hpp =
+[
+    [ "check_units_convertible", "dataspace__visitors_8hpp.html#a3ab5001b50a84e3272dce8683a090a19", null ],
+    [ "get_dataspace_text", "dataspace__visitors_8hpp.html#a996e8334310f95305fb4cb0c39989205", null ],
+    [ "get_unit_text", "dataspace__visitors_8hpp.html#a251dc157560a1e0742a4d056e198ca7d", null ],
+    [ "get_unit_accessors", "dataspace__visitors_8hpp.html#ac0531d413b05e0b40ea437a65d490f47", null ],
+    [ "get_unit_default_domain", "dataspace__visitors_8hpp.html#a42950316d8767977db3b5f6ea46ab5a3", null ],
+    [ "get_pretty_unit_text", "dataspace__visitors_8hpp.html#a65beedf0247fbf8e2b61efc13fa993f2", null ],
+    [ "get_unit_accessor", "dataspace__visitors_8hpp.html#a1540c4dad12b8f59b2fdd64f1bd02859", null ],
+    [ "parse_dataspace", "dataspace__visitors_8hpp.html#a112180a00148a812257df10e0239fc43", null ],
+    [ "parse_unit", "dataspace__visitors_8hpp.html#a85e4fdeca3769c54d453f09fd97dbceb", null ],
+    [ "parse_pretty_unit", "dataspace__visitors_8hpp.html#a6aec0248e0a65321d49e22331316b708", null ],
+    [ "parse_unit", "dataspace__visitors_8hpp.html#acd6c9ab3f5257453d56a4e1fd957f894", null ],
+    [ "make_value", "dataspace__visitors_8hpp.html#a9d3bfead1f4450617eb76ec1eb178648", null ],
+    [ "make_unit", "dataspace__visitors_8hpp.html#ae076f5dd01446e4ec5782fceef0591c7", null ],
+    [ "matching_type", "dataspace__visitors_8hpp.html#a887d1cdd51b2fdcc3f7f9b3854ab59b5", null ],
+    [ "matching_type", "dataspace__visitors_8hpp.html#ac967e3cbf6ec70f309d277fa5c39e218", null ],
+    [ "convert", "dataspace__visitors_8hpp.html#ab961f42d58b4db37e435bb0b1827cbea", null ],
+    [ "convert", "dataspace__visitors_8hpp.html#a12f3f3fb0932a6ea397f7b7e3c7763e3", null ],
+    [ "to_value", "dataspace__visitors_8hpp.html#a1648220769e18e7ac09e4156733294a2", null ],
+    [ "to_unit", "dataspace__visitors_8hpp.html#aeab0c1d090452ac52241d7e76a9c8681", null ],
+    [ "to_pretty_string", "dataspace__visitors_8hpp.html#af05053adbc4078c7fd654d7806f76ee3", null ],
+    [ "merge", "dataspace__visitors_8hpp.html#a980a2189becfd1f94303c41457e01151", null ],
+    [ "merge", "dataspace__visitors_8hpp.html#a2744c924846692dd692ea93b55aeebf0", null ],
+    [ "merge", "dataspace__visitors_8hpp.html#aa2f2d06c83162a5163d4e469fcb07df9", null ],
+    [ "merge", "dataspace__visitors_8hpp.html#adeaaee84edb5240fee5319d52a6ec007", null ]
+];
