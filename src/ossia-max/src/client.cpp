@@ -81,6 +81,7 @@ void* client::create(t_symbol* name, long argc, t_atom* argv)
 
   if (x)
   {
+    critical_enter(0);
     auto& pat_desc = ossia_max::instance().patchers[x->m_patcher];
     if(!pat_desc.client && !pat_desc.device)
       pat_desc.client = x;
@@ -88,6 +89,7 @@ void* client::create(t_symbol* name, long argc, t_atom* argv)
     {
       error("You can put only one [ossia.device] or [ossia.client] per patcher");
       object_free(x);
+      critical_exit(0);
       return nullptr;
     }
 
@@ -127,11 +129,10 @@ void* client::create(t_symbol* name, long argc, t_atom* argv)
     // process attr args, if any
     attr_args_process(x, argc - attrstart, argv + attrstart);
 
-    // need to schedule a loadbang because objects only receive a loadbang when patcher loads.
-    x->m_reg_clock = clock_new(x, (method) object_base::loadbang);
-    clock_set(x->m_reg_clock, 1);
+    defer_low(x, (method) object_base::loadbang, nullptr, 0, nullptr);
 
     ossia_library.clients.push_back(x);
+    critical_exit(0);
   }
 
   return (x);
@@ -139,6 +140,7 @@ void* client::create(t_symbol* name, long argc, t_atom* argv)
 
 void client::destroy(client* x)
 {
+  critical_enter(0);
   auto pat_it = ossia_max::instance().patchers.find(x->m_patcher);
   if(pat_it != ossia_max::instance().patchers.end())
   {
@@ -164,6 +166,7 @@ void client::destroy(client* x)
   ossia_max::instance().clients.remove_all(x);
 
   x->~client();
+  critical_exit(0);
 }
 
 #pragma mark -
@@ -383,8 +386,8 @@ void client::connect(client* x)
     client::on_device_created(x);
     clock_unset(x->m_clock);
 
-    register_children_in_patcher_recursively(get_patcher(&x->m_object), x);
-    output_all_values(get_patcher(&x->m_object), true);
+    register_children_in_patcher_recursively(x->m_patcher, x);
+    output_all_values(x->m_patcher, true);
   }
   else
   {
@@ -456,6 +459,7 @@ void client::disconnect(client* x)
     x->m_node_selection.clear();
     x->m_matchers.clear();
     x->disconnect_slots();
+    // FIXME it should not be necessary to unregister_children because they should listen to on_node_removing signal
     x->unregister_children();
     x->m_device = nullptr;
     x->m_oscq_protocol = nullptr;

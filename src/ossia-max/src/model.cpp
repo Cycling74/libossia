@@ -18,7 +18,6 @@ extern "C" void ossia_model_setup()
 {
   auto& ossia_library = ossia_max::instance();
 
-  // instantiate the ossia.parameter class
   t_class* c = class_new(
       "ossia.model", (method)model::create, (method)model::destroy,
       (long)sizeof(ossia::max::model), 0L, A_GIMME, 0);
@@ -51,6 +50,7 @@ void* model::create(t_symbol*, long argc, t_atom* argv)
 
   if (x)
   {
+    critical_enter(0);
     auto& pat_desc = ossia_max::instance().patchers[x->m_patcher];
     if( !pat_desc.model && !pat_desc.view)
     {
@@ -60,6 +60,7 @@ void* model::create(t_symbol*, long argc, t_atom* argv)
     {
       error("You can put only one [ossia.model] or [ossia.view] per patcher");
       object_free(x);
+      critical_exit(0);
       return nullptr;
     }
 
@@ -71,9 +72,13 @@ void* model::create(t_symbol*, long argc, t_atom* argv)
     x->m_description = _sym_nothing;
     x->m_tags_size = 0;
 
+    // process attr args, if any
+    long attrstart = attr_args_offset(argc, argv);
+    attr_args_process(x, argc - attrstart, argv + attrstart);
+
     // check name argument
     x->m_name = _sym_nothing;
-    if (argc > 0 && argv)
+    if (argc > 0 && attrstart > 0 )
     {
       if (atom_gettype(argv) == A_SYM)
       {
@@ -82,22 +87,10 @@ void* model::create(t_symbol*, long argc, t_atom* argv)
       }
     }
 
-    if (x->m_name == _sym_nothing)
-    {
-      object_error((t_object*)x, "needs a name as first argument");
-      x->m_name = gensym("untitledModel");
-      return x;
-    }
-
-    // process attr args, if any
-    long attrstart = attr_args_offset(argc, argv);
-    attr_args_process(x, argc - attrstart, argv + attrstart);
-
-    // need to schedule a loadbang because objects only receive a loadbang when patcher loads.
-    x->m_reg_clock = clock_new(x, (method) object_base::loadbang);
-    clock_set(x->m_reg_clock, 1);
+    defer_low(x, (method) object_base::loadbang, nullptr, 0, nullptr);
 
     ossia_max::instance().models.push_back(x);
+    critical_exit(0);
   }
 
   return (x);
@@ -105,6 +98,7 @@ void* model::create(t_symbol*, long argc, t_atom* argv)
 
 void model::destroy(model* x)
 {
+  critical_enter(0);
   auto pat_it = ossia_max::instance().patchers.find(x->m_patcher);
   if(pat_it != ossia_max::instance().patchers.end())
   {
@@ -124,12 +118,13 @@ void model::destroy(model* x)
   x->m_registered = false;
 
   register_children_in_patcher_recursively(x->m_patcher, x->find_parent_object());
-  output_all_values(get_patcher(&x->m_object), true);
+  output_all_values(x->m_patcher, true);
 
   ossia_max::instance().models.remove_all(x);
   if(x->m_dumpout)
     outlet_delete(x->m_dumpout);
   x->~model();
+  critical_exit(0);
 }
 
 void model::assist(model*, void*, long m, long, char* s)
@@ -160,36 +155,6 @@ void model::do_registration()
   set_tags();
   set_hidden();
   set_recall_safe();
-}
-
-void save_children_recursively(t_object* patcher)
-{
-  auto& pat_desc = ossia_max::instance().patchers[patcher];
-
-  for(auto x : pat_desc.parameters)
-  {
-    x->save_values();
-  }
-
-  for(auto subpatch : pat_desc.subpatchers)
-  {
-    save_children_recursively(subpatch);
-  }
-}
-
-void model::save_children_state()
-{
-  auto& pat_desc = ossia_max::instance().patchers[m_patcher];
-
-  for(auto x : pat_desc.parameters)
-  {
-    x->save_values();
-  }
-
-  for(auto subpatch : pat_desc.subpatchers)
-  {
-    save_children_recursively(subpatch);
-  }
 }
 
 } // max namespace

@@ -33,7 +33,6 @@ void object_namespace(object_base* x);
 std::vector<object_base*> find_children_to_register(
     t_object* object, t_object* patcher, t_symbol* classname, bool search_dev = false);
 
-
 /**
  * @brief register_objects_in_patcher_recursively : iterate over all patcher's objects and register them one by one recursively
  * @param root_patcher: starting patcher
@@ -117,6 +116,13 @@ struct node_priority
 {
   std::shared_ptr<matcher> obj{};
   std::vector<ossia::net::priority> priorities;
+
+  friend std::ostream &operator<<( std::ostream &output, const node_priority &n ) {
+    output << object_classname(n.obj->get_owner())->s_name << "\t" << n.obj->get_node()->get_name() << "\t";
+    for(auto p : n.priorities)
+      output << p << " ";
+    return output;
+  }
 };
 
 /**
@@ -261,6 +267,7 @@ static inline T* find_parent_box_alive(
 template <typename T>
 void address_mess_cb(T* x, t_symbol* address)
 {
+  x->save_children_state();
   x->m_name = address;
   x->m_addr_scope = ossia::net::get_address_scope(x->m_name->s_name);
   x->update_path();
@@ -272,7 +279,7 @@ void address_mess_cb(T* x, t_symbol* address)
   || x->m_otype == object_class::model)
   {
     register_children_in_patcher_recursively(x->m_patcher, x);
-    output_all_values(get_patcher(&x->m_object), x->m_otype == object_class::model);
+    output_all_values(x->m_patcher, false);
   }
 }
 

@@ -125,6 +125,7 @@ void* attribute::create(t_symbol* name, int argc, t_atom* argv)
 
   if (x)
   {
+    critical_enter(0);
     ossia_max::instance().patchers[x->m_patcher].attributes.push_back(x);
 
     x->m_otype = object_class::attribute;
@@ -152,9 +153,9 @@ void* attribute::create(t_symbol* name, int argc, t_atom* argv)
     // https://cycling74.com/forums/notify-when-attribute-changes
     object_attach_byptr_register(x, x, CLASS_BOX);
 
-    // need to schedule a loadbang because objects only receive a loadbang when patcher loads.
-    x->m_reg_clock = clock_new(x, (method) object_base::loadbang);
-    clock_set(x->m_reg_clock, 1);
+    defer_low(x, (method) object_base::loadbang, nullptr, 0, nullptr);
+
+    critical_exit(0);
   }
 
   return (x);
@@ -162,6 +163,7 @@ void* attribute::create(t_symbol* name, int argc, t_atom* argv)
 
 void attribute::destroy(attribute* x)
 {
+  critical_enter(0);
   auto pat_it = ossia_max::instance().patchers.find(x->m_patcher);
   if(pat_it != ossia_max::instance().patchers.end())
   {
@@ -184,6 +186,7 @@ void attribute::destroy(attribute* x)
 
   outlet_delete(x->m_dumpout);
   x->~attribute();
+  critical_exit(0);
 }
 
 } // pd namespace

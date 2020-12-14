@@ -461,15 +461,17 @@ ossia::value atom2value(t_symbol* s, int argc, t_atom* argv)
   }
 }
 
-
 template<class T> void register_objects_by_type(const ossia::safe_set<T>& objs)
 {
   for(auto obj : objs)
   {
-    obj->m_node_selection.clear();
-    obj->m_matchers.clear();
-    obj->update_path();
-    obj->do_registration();
+    if(!obj->m_dead)
+    {
+      obj->m_node_selection.clear();
+      obj->m_matchers.clear();
+      obj->update_path();
+      obj->do_registration();
+    }
   }
 }
 
@@ -490,7 +492,7 @@ void register_children_in_patcher_recursively(t_object* patcher, object_base* ca
                                       static_cast<device_base*>(pat_desc.client);
     if(db && db != caller)
     {
-      if(db->m_device)
+      if(db->m_device && !db->m_dead)
       {
         db->m_registered = true;
         return register_children_in_patcher_recursively(patcher, db);
@@ -505,27 +507,30 @@ void register_children_in_patcher_recursively(t_object* patcher, object_base* ca
 
   if(nb && nb != caller)
   {
-    nb->m_node_selection.clear();
-    nb->m_matchers.clear();
-    nb->update_path();
-    switch(nb->m_otype)
+    if(!nb->m_dead)
     {
-      case object_class::model:
+      nb->m_node_selection.clear();
+      nb->m_matchers.clear();
+      nb->update_path();
+      switch(nb->m_otype)
       {
-        auto mdl = static_cast<model*>(nb);
-        mdl->do_registration();
-        register_children_in_patcher_recursively(patcher, mdl);
-        break;
+        case object_class::model:
+        {
+          auto mdl = static_cast<model*>(nb);
+          mdl->do_registration();
+          register_children_in_patcher_recursively(patcher, mdl);
+          break;
+        }
+        case object_class::view:
+        {
+          auto vw = static_cast<view*>(nb);
+          vw->do_registration();
+          register_children_in_patcher_recursively(patcher, vw);
+          break;
+        }
+        default:
+          break;
       }
-      case object_class::view:
-      {
-        auto vw = static_cast<view*>(nb);
-        vw->do_registration();
-        register_children_in_patcher_recursively(patcher, vw);
-        break;
-      }
-      default:
-        break;
     }
     return;
   }
@@ -540,7 +545,6 @@ void register_children_in_patcher_recursively(t_object* patcher, object_base* ca
   }
 }
 
-// TODO put ptcher in cache, it won't change during object's life
 t_object* get_patcher(t_object* object)
 {
   t_object* patcher = nullptr;

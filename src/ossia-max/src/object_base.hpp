@@ -1,6 +1,12 @@
 #pragma once
 #include <ossia/detail/config.hpp>
 #include "ext.h"
+#include "ext_obex.h"
+#ifdef MAC_VERSION
+#include "Multiprocessing.h" // should be included before "ext_critical.h"
+#endif
+#include "ext_critical.h"
+
 #include "matcher.hpp"
 
 #include <ossia/detail/safe_vec.hpp>
@@ -80,8 +86,6 @@ public:
   object_class m_otype{};
 
   void* m_clock{};
-  void* m_reg_clock{}; // registration clock that should be initialized by constructor
-                       // and canceled by loadbang method
   void* m_highlight_clock{}; // clock to reset color after some amount of time
                              // to highlight the object in the patcher
 
@@ -123,7 +127,7 @@ public:
   t_symbol* m_name{};
   t_symbol* m_tags[OSSIA_MAX_MAX_ATTR_SIZE] = {{}};
   t_symbol* m_description{};
-  long m_priority{};
+  float m_priority{};
   long m_invisible{};
   long m_defer_set{1};
   long m_recall_safe{};
@@ -157,12 +161,13 @@ public:
   static void set(object_base* x, t_symbol* s, int argc, t_atom* argv);
   static void get_address(object_base *x,  std::vector<matcher*> nodes);
   static void lock_and_touch(object_base* x, t_symbol* s);
+  static void closebang(object_base* x);
   static void loadbang(object_base* x);
+  void save_children_state();
   void highlight();
   static void reset_color(object_base* x);
 
   void push_parameter_value(ossia::net::parameter_base* param, const ossia::value& val);
-//  std::vector<ossia::value> m_set_pool;
 
   ossia::traversal::path get_path()
   {

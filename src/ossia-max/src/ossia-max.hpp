@@ -27,6 +27,7 @@
 #include "search.hpp"
 #include "router.hpp"
 #include "fuzzysearch.hpp"
+#include "assert.hpp"
 
 #include "ZeroconfOscqueryListener.hpp"
 #include "ZeroconfMinuitListener.hpp"
@@ -47,6 +48,8 @@ extern "C"
     OSSIA_MAX_EXPORT void ossia_search_setup();
     OSSIA_MAX_EXPORT void ossia_monitor_setup();
     OSSIA_MAX_EXPORT void ossia_fuzzysearch_setup();
+    OSSIA_MAX_EXPORT void ossia_assert_setup();
+    OSSIA_MAX_EXPORT void ossia_equals_setup();
 }
 
 namespace ossia
@@ -114,6 +117,7 @@ public:
     if(std::is_same<T, ossia::max::search>::value) return ossia_search_class;
     if(std::is_same<T, ossia::max::router>::value) return ossia_router_class;
     if(std::is_same<T, ossia::max::fuzzysearch>::value) return ossia_fuzzysearch_class;
+    if(std::is_same<T, ossia::max::oassert>::value) return ossia_assert_class;
     return nullptr;
   }
 
@@ -147,6 +151,7 @@ public:
   t_class* ossia_remote_class{};
   t_class* ossia_view_class{};
   t_class* ossia_ossia_class{};
+  t_class* ossia_assert_class{};
 
   // keep list of all objects
   ossia::safe_vector<parameter*> parameters;
@@ -159,6 +164,8 @@ public:
   ossia::safe_vector<explorer*> explorers;
   ossia::safe_vector<monitor*> monitors;
   ossia::safe_vector<search*> searchs;
+  ossia::safe_vector<logger*> loggers;
+  ossia::safe_vector<oassert*> oasserts;
 
   // TODO remove all those nr* vectors, should not be needed
   // list of non-registered objects
@@ -174,18 +181,6 @@ public:
   static std::map<ossia::net::node_base*, ossia::safe_set<matcher*>> s_node_matchers_map;
 
   bool registering_nodes=false;
-
-  // TODO this should not be needed anymore
-  // this is used at loadbang to mark a patcher loaded
-  // and trigger its registration
-  struct root_descriptor{
-    bool is_loadbanged{};
-    unsigned long count{}; // number of object under this root
-
-    unsigned long inc(){ return ++count;}
-    unsigned long dec(){ return --count;}
-  };
-  typedef std::map<t_object*, root_descriptor> RootMap;
 
   struct patcher_descriptor{
     ossia::safe_set<parameter*> parameters{};
@@ -225,7 +220,6 @@ public:
   };
   std::map<t_object*, patcher_descriptor> patchers;
 
-  RootMap root_patcher;
   void* m_reg_clock{};
   static void* s_browse_clock;
 

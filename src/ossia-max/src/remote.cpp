@@ -57,6 +57,7 @@ void* remote::create(t_symbol* name, long argc, t_atom* argv)
 
   if (x)
   {
+    critical_enter(0);
     ossia_max::instance().patchers[x->m_patcher].remotes.push_back(x);
     device_base::on_device_created.connect<&remote::on_device_created>(x);
     device_base::on_device_removing.connect<&remote::on_device_removing>(x);
@@ -103,10 +104,9 @@ void* remote::create(t_symbol* name, long argc, t_atom* argv)
     // https://cycling74.com/forums/notify-when-attribute-changes
     object_attach_byptr_register(x, x, CLASS_BOX);
 
-    // TODO put the following in a template and use it in all objects
-    // need to schedule a loadbang because objects only receive a loadbang when patcher loads.
-    x->m_reg_clock = clock_new(x, (method) object_base::loadbang);
-    clock_set(x->m_reg_clock, 1);
+    defer_low(x, (method) object_base::loadbang, nullptr, 0, nullptr);
+
+    critical_exit(0);
   }
 
   return (x);
@@ -114,6 +114,7 @@ void* remote::create(t_symbol* name, long argc, t_atom* argv)
 
 void remote::destroy(remote* x)
 {
+  critical_enter(0);
   auto pat_it = ossia_max::instance().patchers.find(x->m_patcher);
   if(pat_it != ossia_max::instance().patchers.end())
   {
@@ -137,6 +138,7 @@ void remote::destroy(remote* x)
   device_base::on_device_removing.disconnect<&remote::on_device_removing>(x);
 
   x->~remote();
+  critical_exit(0);
 }
 
 void remote::assist(remote* x, void* b, long m, long a, char* s)

@@ -106,6 +106,7 @@ void* device::create(t_symbol*, long argc, t_atom* argv)
 
   if (x)
   {
+    critical_enter(0);
     auto& pat_desc = ossia_max::instance().patchers[x->m_patcher];
     if(!pat_desc.device && !pat_desc.client)
     {
@@ -115,6 +116,7 @@ void* device::create(t_symbol*, long argc, t_atom* argv)
     {
       error("You can put only one [ossia.device] or [ossia.client] per patcher");
       object_free(x);
+      critical_exit(0);
       return nullptr;
     }
 
@@ -145,12 +147,13 @@ void* device::create(t_symbol*, long argc, t_atom* argv)
                                                                x->m_name->s_name);
     x->connect_slots();
 
-    // need to schedule a loadbang because objects only receive a loadbang when patcher loads.
-    x->m_reg_clock = clock_new(x, (method) object_base::loadbang);
-    clock_set(x->m_reg_clock, 1);
+    defer_low(x, (method) object_base::loadbang, nullptr, 0, nullptr);
+
     ossia_max::instance().devices.push_back(x);
 
     on_device_created(x);
+
+    critical_exit(0);
   }
 
   return (x);
@@ -158,6 +161,7 @@ void* device::create(t_symbol*, long argc, t_atom* argv)
 
 void device::destroy(device* x)
 {
+  critical_enter(0);
   auto pat_it = ossia_max::instance().patchers.find(x->m_patcher);
   if(pat_it != ossia_max::instance().patchers.end())
   {
@@ -176,8 +180,8 @@ void device::destroy(device* x)
         matchers = parent_object->m_matchers;
       else
         matchers.push_back(std::make_shared<matcher>(&ossia_max::instance().get_default_device()->get_root_node(), nullptr));
-      register_children_in_patcher_recursively(get_patcher(&x->m_object), nullptr);
-      output_all_values(get_patcher(&x->m_object), true);
+      register_children_in_patcher_recursively(x->m_patcher, nullptr);
+      output_all_values(x->m_patcher, true);
     }
   }
 
@@ -221,14 +225,15 @@ void device::destroy(device* x)
   ossia_max::instance().devices.remove_all(x);
 
   x->~device();
+  critical_exit(0);
 }
 
 // TODO do we still need this function ?
 void device::register_children(device* x)
 {
   std::vector<std::shared_ptr<matcher>> matchers{std::make_shared<matcher>(&x->m_device->get_root_node(), x)};
-  register_children_in_patcher_recursively(get_patcher(&x->m_object), x);
-  output_all_values(get_patcher(&x->m_object), true);
+  register_children_in_patcher_recursively(x->m_patcher, x);
+  output_all_values(x->m_patcher, true);
 }
 
 void device::expose(device* x, t_symbol*, long argc, t_atom* argv)
