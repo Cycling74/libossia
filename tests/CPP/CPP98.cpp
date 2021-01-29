@@ -386,3 +386,36 @@ TEST_CASE ("remove_children_observed", "[remove_children_observed]")
   REQUIRE(remote_dev.get_root_node().find_child("/foo/resp"));
   REQUIRE(remote_dev.get_root_node().find_child("/foo/resp").get_value().to_int() == 2);
 }
+
+
+//two mirrors, expecting that an update from 1 mirror will go to the 2nd mirror
+TEST_CASE ("mirror_update_mirror", "[mirror_update_mirror]")
+{
+  opp::oscquery_server server("yeah");
+  auto foo = server.get_root_node().create_child("foo");
+  auto bar = foo.create_child("bar");
+  auto i = bar.create_int("baz");
+  i.set_value(1);
+
+  opp::oscquery_mirror remote_dev1("remote1", "ws://127.0.0.1:5678");
+  opp::oscquery_mirror remote_dev2("remote2", "ws://127.0.0.1:5678");
+
+  remote_dev1.refresh();
+  remote_dev2.refresh();
+  auto ri = remote_dev1.get_root_node().find_child("/foo/bar/baz");
+  REQUIRE(ri);
+  REQUIRE(remote_dev2.get_root_node().find_child("/foo/bar/baz"));
+  REQUIRE(remote_dev1.get_root_node().find_child("/foo/bar/baz").get_value().to_int() == 1);
+  REQUIRE(remote_dev2.get_root_node().find_child("/foo/bar/baz").get_value().to_int() == 1);
+
+  i.set_value(2084);
+  sleep(1); //TODO is there something better than sleep?
+  REQUIRE(remote_dev1.get_root_node().find_child("/foo/bar/baz").get_value().to_int() == 2084);
+  REQUIRE(remote_dev2.get_root_node().find_child("/foo/bar/baz").get_value().to_int() == 2084);
+
+  ri.set_value(9);
+  sleep(1); //TODO is there something better than sleep?
+  REQUIRE(i.get_value().to_int() == 9);
+  REQUIRE(remote_dev1.get_root_node().find_child("/foo/bar/baz").get_value().to_int() == 9);
+  REQUIRE(remote_dev2.get_root_node().find_child("/foo/bar/baz").get_value().to_int() == 9);
+}
