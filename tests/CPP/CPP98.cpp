@@ -392,6 +392,7 @@ TEST_CASE ("remove_children_observed", "[remove_children_observed]")
 TEST_CASE ("mirror_update_mirror", "[mirror_update_mirror]")
 {
   opp::oscquery_server server("yeah");
+  server.set_echo(true);
   auto foo = server.get_root_node().create_child("foo");
   auto bar = foo.create_child("bar");
   auto i = bar.create_int("baz");
