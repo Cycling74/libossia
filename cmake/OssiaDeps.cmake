@@ -1,3 +1,15 @@
+#setup conan
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+	message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+	file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
+		"${CMAKE_BINARY_DIR}/conan.cmake")
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+conan_check(VERSION 1.29.0 REQUIRED)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+
 if(OSSIA_SUBMODULE_AUTOUPDATE)
   message(STATUS "Update general libossia dependencies :")
   set(OSSIA_SUBMODULES
@@ -72,36 +84,21 @@ if(OSSIA_SUBMODULE_AUTOUPDATE)
   set(OSSIA_SUBMODULE_AUTOUPDATE OFF CACHE BOOL "Auto update submodule" FORCE)
 endif()
 
-# Download various dependencies
-set(BOOST_MINOR_MINIMAL 67)
-set(BOOST_MINOR_LATEST 75)
-find_package(Boost 1.${BOOST_MINOR_MINIMAL} QUIET)
-if (NOT Boost_FOUND)
-  set(OSSIA_MUST_INSTALL_BOOST 1 CACHE INTERNAL "")
-  set(BOOST_VERSION "boost_1_${BOOST_MINOR_LATEST}_0" CACHE INTERNAL "")
-  if ( NOT EXISTS "${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}/")
 
-    if(WIN32)
-      message(STATUS "Downloading boost to ${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}.zip")
-      set(BOOST_URL https://github.com/ossia/sdk/releases/download/sdk17/${BOOST_VERSION}.zip)
-      set(BOOST_ARCHIVE ${BOOST_VERSION}.zip)
-    else()
-      message(STATUS "Downloading boost to ${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}.tar.gz")
-      set(BOOST_URL https://github.com/ossia/sdk/releases/download/sdk17/${BOOST_VERSION}.tar.gz)
-      set(BOOST_ARCHIVE ${BOOST_VERSION}.tar.gz)
-    endif()
+conan_cmake_configure(
+  REQUIRES boost/1.75.0
+  GENERATORS cmake_find_package
+  OPTIONS boost:shared=False
+  )
+conan_cmake_install(
+  PATH_OR_REFERENCE .
+  BUILD missing
+)
 
-    file(DOWNLOAD "${BOOST_URL}" "${OSSIA_3RDPARTY_FOLDER}/${BOOST_ARCHIVE}")
-
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" -E tar xzf "${BOOST_ARCHIVE}"
-    WORKING_DIRECTORY "${OSSIA_3RDPARTY_FOLDER}")
-
-  endif()
-  set(BOOST_ROOT "${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}" CACHE INTERNAL "")
-  set(Boost_INCLUDE_DIR "${BOOST_ROOT}")
-  find_package(Boost 1.${BOOST_MINOR_LATEST} REQUIRED)
-endif()
+find_package(
+  Boost 1.75
+  REQUIRED
+)
 
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY
