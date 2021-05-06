@@ -1,3 +1,15 @@
+#setup conan
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+	message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+	file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
+		"${CMAKE_BINARY_DIR}/conan.cmake")
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+conan_check(VERSION 1.29.0 REQUIRED)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+
 if(OSSIA_SUBMODULE_AUTOUPDATE)
   message(STATUS "Update general libossia dependencies :")
   set(OSSIA_SUBMODULES
@@ -72,6 +84,19 @@ if(OSSIA_SUBMODULE_AUTOUPDATE)
   set(OSSIA_SUBMODULE_AUTOUPDATE OFF CACHE BOOL "Auto update submodule" FORCE)
 endif()
 
+conan_cmake_configure(
+  REQUIRES boost/1.75.0
+  GENERATORS cmake_find_package
+  OPTIONS boost:shared=False
+)
+conan_cmake_install(
+  PATH_OR_REFERENCE .
+  BUILD missing
+)
+
+find_package(Boost 1.75 REQUIRED)
+
+if (FALSE)
 # Download various dependencies
 set(BOOST_MINOR_MINIMAL 67)
 set(BOOST_MINOR_LATEST 78)
@@ -97,6 +122,7 @@ if (NOT Boost_FOUND)
   set(BOOST_ROOT "${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}" CACHE INTERNAL "")
   set(Boost_INCLUDE_DIR "${BOOST_ROOT}")
   find_package(Boost 1.${BOOST_MINOR_LATEST} REQUIRED)
+endif()
 endif()
 
 add_library(boost INTERFACE IMPORTED)
