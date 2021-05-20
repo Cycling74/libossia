@@ -10,7 +10,6 @@ class LibossiaConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": True}
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     requires = "boost/1.75.0"
 
@@ -33,6 +32,7 @@ class LibossiaConan(ConanFile):
     def export_sources(self):
         git = tools.Git(folder=self.recipe_folder)
         git.run("submodule update --init --recursive")
+        self.copy("CMakeLists.txt")
         self.copy("src/**")
         self.copy("cmake/**")
         self.copy("3rdparty/**")
