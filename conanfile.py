@@ -11,7 +11,6 @@ class LibossiaConan(ConanFile):
     options = {"fPIC": [True, False], "shared": [True, False]}
     default_options = {"fPIC": True, "shared": True}
     generators = "cmake"
-    requires = "boost/1.75.0"
     export_sources = ["CMakeLists.txt", "src/**", "cmake/**", "3rdparty/**"]
 
     def config_options(self):
