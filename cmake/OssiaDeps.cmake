@@ -86,7 +86,9 @@ endif()
 conan_cmake_configure(
   REQUIRES boost/1.75.0
   GENERATORS cmake_find_package
-  OPTIONS boost:shared=False
+  OPTIONS
+    boost:shared=False
+    boost:without_stacktrace=True
 )
 conan_cmake_autodetect(settings)
 conan_cmake_install(
