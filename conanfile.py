@@ -9,7 +9,7 @@ class LibossiaConan(ConanFile):
     topics = ("creative-coding", "osc", "open-sound-control", "ossia", "oscquery")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False], "shared": [True, False]}
-    default_options = {"fPIC": True, "shared": True}
+    default_options = {"fPIC": True, "shared": False}
     generators = "cmake"
     export_sources = ["CMakeLists.txt", "src/**", "cmake/**", "3rdparty/**"]
 
