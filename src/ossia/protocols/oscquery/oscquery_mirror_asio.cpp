@@ -40,14 +40,18 @@ struct oscquery_mirror_asio_protocol::osc_receiver_impl : ossia::net::udp_receiv
 
 struct http_async_answer
 {
-  oscquery_mirror_asio_protocol& self;
+  std::weak_ptr<oscquery_shared_async_state> state;
 
   template <typename T, typename S>
   void operator()(T& req, const S& str)
   {
-    if (self.on_text_ws_message({}, str))
+    if(auto ptr = state.lock())
     {
-      req.close();
+      if (ptr->active)
+      {
+        if(ptr->self.on_text_ws_message({}, str))
+          req.close();
+      }
     }
   }
 };
@@ -103,6 +107,7 @@ oscquery_mirror_asio_protocol::oscquery_mirror_asio_protocol(
     , m_http{std::make_unique<http_async_client_context>()}
     , m_id{*this, {}}
 {
+  m_async_state = std::shared_ptr<oscquery_shared_async_state>(new oscquery_shared_async_state{*this, true});
   auto port_idx = m_queryHost.find_last_of(':');
   if (port_idx != std::string::npos)
     m_queryPort = m_queryHost.substr(port_idx + 1);
@@ -122,11 +127,7 @@ oscquery_mirror_asio_protocol::oscquery_mirror_asio_protocol(
 
 void oscquery_mirror_asio_protocol::stop()
 {
-  cleanup_connections();
-}
-
-void oscquery_mirror_asio_protocol::cleanup_connections()
-{
+  m_async_state->active = false;
   try
   {
     m_oscServer->close();
@@ -158,10 +159,14 @@ void oscquery_mirror_asio_protocol::cleanup_connections()
   }
 }
 
+void oscquery_mirror_asio_protocol::cleanup_connections()
+{
+}
+
 void oscquery_mirror_asio_protocol::http_send_message(const std::string& str)
 {
   auto hrq = std::make_shared<http_async_request>(
-      http_async_answer{*this}, http_async_error{}, m_ctx->context, m_httpHost, str);
+      http_async_answer{m_async_state}, http_async_error{}, m_ctx->context, m_httpHost, str);
   hrq->resolve(m_httpHost, m_queryPort);
 }
 
@@ -169,7 +174,7 @@ void oscquery_mirror_asio_protocol::http_send_message(
     const rapidjson::StringBuffer& str)
 {
   auto hrq = std::make_shared<http_async_request>(
-      http_async_answer{*this}, http_async_error{}, m_ctx->context, m_httpHost,
+      http_async_answer{m_async_state}, http_async_error{}, m_ctx->context, m_httpHost,
       str.GetString());
   hrq->resolve(m_httpHost, m_queryPort);
 }
@@ -449,6 +454,7 @@ void oscquery_mirror_asio_protocol::start_osc()
 {
   m_oscServer = std::make_unique<osc_receiver_impl>(ossia::net::socket_configuration{"0.0.0.0", (uint16_t)m_osc_port}, this->m_ctx->context);
   m_oscServer->open();
+  m_osc_port = m_oscServer->m_socket.local_endpoint().port();
   m_oscServer->receive([this] (const char* data, std::size_t sz) { process_raw_osc_data(data, sz); });
 }
 

@@ -110,13 +110,27 @@ public:
   void transport_impl(ossia::time_value offset) override;
   void mute_impl(bool) override;
 
+  /*! Used to play an off-time interval,
+   *  disregarding all the rules of the scenario.
+   *  e.g. this is used when pressing the "play" button on a random interval in score.
+   */
+  void start_interval(ossia::time_interval&, double ratio = 0.0);
+  /*! Used to stop an interval,
+   *  disregarding all the rules of the scenario.
+   *  e.g. this is used when pressing the "stop" button on a random interval in score.
+   */
+  void stop_interval(ossia::time_interval&, double ratio = 0.0);
+
   small_sync_vec get_roots() const noexcept;
 
   void reset_subgraph(
       const ptr_container<time_sync>&, const ptr_container<time_interval>&,
       time_sync& root);
 
+  ossia::time_value last_date() const noexcept { return m_last_date; }
 private:
+  ossia::time_value m_last_date{ossia::Infinite};
+
   ptr_container<time_interval> m_intervals;
   ptr_container<time_sync> m_nodes; // list of all TimeSyncs of the scenario
                                     // (the first is the start node)
@@ -132,7 +146,16 @@ private:
   sync_set m_endNodes; // used as cache
   scenario_graph m_sg; // used as cache
 
-  ossia::time_value m_lastDate{ossia::Infinite};
+  // Used to start intervals off-time
+  struct quantized_interval {
+    ossia::time_interval* interval{};
+    double quantization_ratio{};
+    operator ossia::time_interval*() const noexcept { return interval; }
+  };
+
+  ossia::small_vector<quantized_interval, 2> m_itv_to_start;
+  ossia::small_vector<quantized_interval, 2> m_itv_to_stop;
+
 
   static void make_happen(
       time_event& event, interval_set& started, interval_set& stopped,

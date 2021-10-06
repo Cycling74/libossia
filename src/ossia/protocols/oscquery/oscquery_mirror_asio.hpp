@@ -35,6 +35,13 @@ struct osc_outbound_visitor;
 struct http_async_client_context;
 struct http_responder;
 
+class oscquery_mirror_asio_protocol;
+struct oscquery_shared_async_state
+{
+  oscquery_mirror_asio_protocol& self;
+  bool active = true;
+};
+
 class OSSIA_EXPORT oscquery_mirror_asio_protocol final
     : public ossia::net::protocol_base
 {
@@ -43,7 +50,7 @@ class OSSIA_EXPORT oscquery_mirror_asio_protocol final
 public:
   oscquery_mirror_asio_protocol(
       ossia::net::network_context_ptr ctx,
-      std::string host, uint16_t local_osc_port = 10203);
+      std::string host, uint16_t local_osc_port = 0);
   ~oscquery_mirror_asio_protocol() override;
 
   bool pull(net::parameter_base&) override;
@@ -147,6 +154,7 @@ private:
   std::unique_ptr<osc_receiver_impl> m_oscServer;
 
   std::unique_ptr<ossia::net::websocket_client> m_websocketClient;
+  std::shared_ptr<oscquery_shared_async_state> m_async_state;
   std::atomic_bool m_hasWS{};
 
   // Listening status of the local software

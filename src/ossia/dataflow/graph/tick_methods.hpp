@@ -4,6 +4,7 @@
 #include <ossia/dataflow/graph_node.hpp>
 #include <ossia/detail/pod_vector.hpp>
 #include <ossia/editor/scenario/time_interval.hpp>
+#include <ossia/editor/scenario/scenario.hpp>
 #include <ossia/audio/audio_tick.hpp>
 
 #include <ossia/editor/scenario/execution_log.hpp>
@@ -116,7 +117,7 @@ struct buffer_tick
 {
   ossia::execution_state& st;
   ossia::graph_interface& g;
-  ossia::time_interval& itv;
+  ossia::scenario& scenar;
   ossia::transport_info_fun transport;
 
   void operator()(const ossia::audio_tick_state& st)
@@ -126,6 +127,7 @@ struct buffer_tick
 
   void operator()(unsigned long frameCount, double seconds)
   {
+    auto& itv = **scenar.get_time_intervals().begin();
 #if defined(OSSIA_EXECUTION_LOG)
     auto log = g_exec_log.start_tick();
 #endif
@@ -138,7 +140,16 @@ struct buffer_tick
     st.cur_date = seconds * 1e9;
 
     const auto flicks = frameCount * st.samplesToModelRatio;
-    const ossia::token_request tok{};
+
+    ossia::token_request tok{};
+    tok.prev_date = scenar.last_date();
+
+    // FIXME this is a bit ugly..
+    if(tok.prev_date == ossia::Infinite)
+      tok.prev_date = 0_tv;
+
+    tok.date = tok.prev_date + flicks;
+
 
     // Notify the current transport state
     if (transport.allocated())
@@ -152,7 +163,7 @@ struct buffer_tick
       auto log = g_exec_log.start_temporal();
 #endif
 
-      itv.tick_offset(ossia::time_value{int64_t(flicks)}, 0_tv, tok);
+      scenar.state_impl(tok);
     }
 
     // Dataflow execution
@@ -173,6 +184,11 @@ struct buffer_tick
 #endif
 
       (st.*Commit)();
+    }
+
+    // Clear the scenario token
+    {
+      scenar.node->requested_tokens.clear();
     }
   }
 };

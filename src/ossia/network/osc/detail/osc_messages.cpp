@@ -1,5 +1,6 @@
 #include <ossia/network/osc/detail/osc_messages.hpp>
 #include <ossia/network/base/osc_address.hpp>
+#include <ossia/network/osc/detail/osc_receive.hpp>
 #include <ossia/detail/logger.hpp>
 
 namespace ossia::net
@@ -15,7 +16,7 @@ static bool is_vec(std::vector<ossia::value>& t)
 }
 }
 
-void osc_learn(node_base *n, const oscpack::ReceivedMessage &m)
+node_base* osc_learn(node_base *n, const oscpack::ReceivedMessage &m)
 {
   // TODO this does not support rgba yet
   // TODO put them in a hash map instead.
@@ -41,7 +42,9 @@ void osc_learn(node_base *n, const oscpack::ReceivedMessage &m)
   }
 
   if (!is_new)
-    return;
+  {
+    return n;
+  }
 
   // Set-up address
   switch (m.ArgumentCount())
@@ -117,6 +120,8 @@ void osc_learn(node_base *n, const oscpack::ReceivedMessage &m)
     break;
   }
   }
+
+  return nullptr;
 }
 
 }

@@ -24,6 +24,7 @@ if(OSSIA_SUBMODULE_AUTOUPDATE)
       frozen
       GSL
       hopscotch-map
+      mdspan
       multi_index
       nano-signal-slot
       rapidfuzz-cpp
