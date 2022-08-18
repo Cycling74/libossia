@@ -99,6 +99,10 @@ conan_cmake_install(
   SETTINGS ${settings}
 )
 
+# Download various dependencies
+set(BOOST_MINOR_MINIMAL 67)
+set(BOOST_MINOR_LATEST 80)
+
 find_package(
   Boost 1.75
   REQUIRED
