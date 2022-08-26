@@ -32,6 +32,7 @@ if(OSSIA_SUBMODULE_AUTOUPDATE)
       SmallFunction
       span
       spdlog
+      unordered_dense
       mparkvariant
       verdigris
       weakjack
