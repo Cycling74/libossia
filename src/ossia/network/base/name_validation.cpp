@@ -11,6 +11,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <fmt/printf.h>
+#include <string.h>
 
 #include <algorithm>
 #if __has_include(<charconv>)
@@ -22,13 +23,12 @@ namespace ossia::net
 std::string& sanitize_device_name(std::string& ret)
 {
   // Note : if this is changed, also change the Qt version in js_utilities.cpp
-  for(int i = 0; i < std::ssize(ret); i++)
+  for (std::string::iterator it = ret.begin(); it != ret.end(); it++)
   {
-    char& c = ret[i];
-    if(is_valid_character_for_device(c))
+    if(is_valid_character_for_device(*it))
       continue;
     else
-      c = '_';
+      *it = '_';
   }
   return ret;
 }
@@ -36,13 +36,12 @@ std::string& sanitize_device_name(std::string& ret)
 std::string& sanitize_name(std::string& ret)
 {
   // Note : if this is changed, also change the Qt version in js_utilities.cpp
-  for(int i = 0; i < std::ssize(ret); i++)
+  for (std::string::iterator it = ret.begin(); it != ret.end(); it++)
   {
-    char& c = ret[i];
-    if(is_valid_character_for_name(c))
+    if(is_valid_character_for_name(*it))
       continue;
     else
-      c = '_';
+      *it = '_';
   }
   return ret;
 }

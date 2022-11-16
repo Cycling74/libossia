@@ -120,11 +120,10 @@ static constexpr int nat_compare_left(nat_char const* a, nat_char const* b)
 template <bool fold_case>
 static constexpr int strnatcmp(nat_char const* a, nat_char const* b)
 {
-  int ai, bi;
-  nat_char ca, cb;
-  int fractional, result;
+  int ai = 0, bi = 0;
+  nat_char ca = 0, cb = 0;
+  int fractional = 0, result = 0;
 
-  ai = bi = 0;
   while(true)
   {
     ca = a[ai];

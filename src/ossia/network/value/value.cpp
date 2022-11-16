@@ -282,14 +282,14 @@ struct value_comparison_visitor2
     return Comparator{}(lhs, rhs);
   }
 
-  template <typename T, typename U>
+  /* template <typename T, typename U>
   requires(
       std::is_same_v<
           T, ossia::value_map_type> || std::is_same_v<U, ossia::value_map_type>) bool
   operator()(const T& lhs, const U& rhs) const
   {
     return false;
-  }
+  } */
 
   template <typename T>
   bool operator()(const T& lhs, const T& rhs) const
