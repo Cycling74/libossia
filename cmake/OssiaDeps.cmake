@@ -86,6 +86,9 @@ conan_cmake_configure(
   OPTIONS
     boost:shared=False
     boost:without_stacktrace=True
+    boost:without_context=True
+    boost:without_coroutine=True
+    boost:without_fiber=True
 )
 conan_cmake_autodetect(settings)
 conan_cmake_install(
