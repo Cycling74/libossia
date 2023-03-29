@@ -5,6 +5,8 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     "${CMAKE_BINARY_DIR}/conan.cmake")
 endif()
 
+set(CONAN_PROFILE "default" CACHE STRING "The profile to use for building conan deps, this is useful for cross compiling")
+
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_check(VERSION 1.29.0 REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
@@ -95,6 +97,10 @@ conan_cmake_install(
   PATH_OR_REFERENCE .
   BUILD missing
   SETTINGS ${settings}
+  PROFILE_HOST ${CONAN_PROFILE}
+  PROFILE_BUILD default
+  SETTINGS_HOST build_type=${CMAKE_BUILD_TYPE}
+  SETTINGS_BUILD build_type=${CMAKE_BUILD_TYPE}
 )
 
 find_package(
