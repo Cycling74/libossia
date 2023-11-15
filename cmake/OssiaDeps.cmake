@@ -83,8 +83,16 @@ if(OSSIA_SUBMODULE_AUTOUPDATE)
   set(OSSIA_SUBMODULE_AUTOUPDATE OFF CACHE BOOL "Auto update submodule" FORCE)
 endif()
 
+# Download various dependencies
+set(BOOST_MINOR_MINIMAL 67)
+set(BOOST_MINOR_LATEST 80)
+
+set(OSSIA_USE_CONAN True)
+
+if (OSSIA_USE_CONAN)
+
 conan_cmake_configure(
-  REQUIRES boost/1.75.0
+  REQUIRES boost/1.${BOOST_MINOR_LATEST}.0
   GENERATORS cmake_find_package
   OPTIONS
     boost:shared=False
@@ -100,14 +108,37 @@ conan_cmake_install(
   SETTINGS ${settings}
 )
 
-# Download various dependencies
-set(BOOST_MINOR_MINIMAL 67)
-set(BOOST_MINOR_LATEST 80)
-
 find_package(
-  Boost 1.75
+  Boost 1.${BOOST_MINOR_LATEST}
   REQUIRED
 )
+
+else()
+
+find_package(Boost 1.${BOOST_MINOR_MINIMAL} QUIET)
+
+if (NOT Boost_FOUND)
+  set(OSSIA_MUST_INSTALL_BOOST 1 CACHE INTERNAL "")
+  set(BOOST_VERSION "boost_1_${BOOST_MINOR_LATEST}_0" CACHE INTERNAL "")
+
+  if(NOT EXISTS "${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}/")
+    message(STATUS "Downloading boost to ${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}.tar.gz")
+    set(BOOST_URL https://github.com/ossia/sdk/releases/download/sdk25/${BOOST_VERSION}.tar.gz)
+    set(BOOST_ARCHIVE ${BOOST_VERSION}.tar.gz)
+
+    file(DOWNLOAD "${BOOST_URL}" "${OSSIA_3RDPARTY_FOLDER}/${BOOST_ARCHIVE}")
+
+    execute_process(
+      COMMAND "${CMAKE_COMMAND}" -E tar xzf "${BOOST_ARCHIVE}"
+      WORKING_DIRECTORY "${OSSIA_3RDPARTY_FOLDER}"
+    )
+  endif()
+  set(BOOST_ROOT "${OSSIA_3RDPARTY_FOLDER}/${BOOST_VERSION}" CACHE INTERNAL "")
+  set(Boost_INCLUDE_DIR "${BOOST_ROOT}")
+  find_package(Boost 1.${BOOST_MINOR_LATEST} REQUIRED)
+endif()
+
+endif()
 
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY
