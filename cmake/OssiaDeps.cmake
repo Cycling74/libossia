@@ -100,6 +100,8 @@ conan_cmake_configure(
     boost:without_context=True
     boost:without_coroutine=True
     boost:without_fiber=True
+    boost:without_locale=True
+    boost:without_log=True
 )
 conan_cmake_autodetect(settings)
 conan_cmake_install(
