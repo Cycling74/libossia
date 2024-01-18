@@ -91,6 +91,8 @@ set(OSSIA_USE_CONAN True)
 
 if (OSSIA_USE_CONAN)
 
+set(CONAN_PROFILE "default" CACHE STRING "The profile to use for building conan deps, this is useful for cross compiling")
+
 conan_cmake_configure(
   REQUIRES boost/1.${BOOST_MINOR_LATEST}.0
   GENERATORS cmake_find_package
@@ -103,11 +105,13 @@ conan_cmake_configure(
     boost:without_locale=True
     boost:without_log=True
 )
-conan_cmake_autodetect(settings)
 conan_cmake_install(
   PATH_OR_REFERENCE .
   BUILD missing
-  SETTINGS ${settings}
+	SETTINGS_HOST build_type=${CMAKE_BUILD_TYPE}
+	SETTINGS_BUILD build_type=${CMAKE_BUILD_TYPE}
+	PROFILE_HOST ${CONAN_PROFILE}
+	PROFILE_BUILD default
 )
 
 find_package(
