@@ -1,8 +1,18 @@
+# vim: set expandtab ts=4 sw=4:
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
+from conan.tools.scm import Git
 
 class LibOssia(ConanFile):
+    name = "libossia"
     settings = "os", "compiler", "build_type", "arch"
+    license = "Available under both LGPLv3 and CeCILL-C"
+    url = "https://opencollective.com/ossia"
+    description = "A modern C++, cross-environment distributed object model for creative coding."
+    topics = ("creative-coding", "osc", "open-sound-control", "ossia", "oscquery")
+
+    exports_sources = "CMakeLists.txt", "src/**", "3rdparty/**", "cmake/**"
+
     options = {
         "shared": [True, False],
 
@@ -67,6 +77,7 @@ class LibOssia(ConanFile):
         "PROTOCOL_ARTNET": [True, False],
         "PROTOCOL_LIBMAPPER": [True, False],
     }
+
     default_options = {
         "shared": True,
 
@@ -107,7 +118,7 @@ class LibOssia(ConanFile):
 
         "PROTOCOL_AUDIO": False,
         "PROTOCOL_MIDI": False,
-        "PROTOCOL_OSC": False,
+        "PROTOCOL_OSC": True,
         "PROTOCOL_MINUIT": False,
         "PROTOCOL_OSCQUERY": True,
         "PROTOCOL_MQTT5": False,
@@ -121,6 +132,10 @@ class LibOssia(ConanFile):
         "PROTOCOL_ARTNET": False,
         "PROTOCOL_LIBMAPPER": False,
     }
+
+    def set_version(self):
+        git = Git(self, self.recipe_folder)
+        self.version = git.run("describe --tags")
 
     def requirements(self):
         self.requires("boost/1.83.0") #websocketcpp requires
@@ -157,6 +172,7 @@ class LibOssia(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
         tc.cache_variables["OSSIA_USE_CONAN"] = True
         tc.cache_variables["OSSIA_STATIC"] = not bool(self.options.shared)
         tc.cache_variables["OSSIA_SUBMODULE_AUTOUPDATE"] = False
@@ -213,6 +229,7 @@ class LibOssia(ConanFile):
         tc.cache_variables["OSSIA_PROTOCOL_LIBMAPPER"] = bool(self.options.PROTOCOL_LIBMAPPER)
 
         tc.generate()
+
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -220,3 +237,7 @@ class LibOssia(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
