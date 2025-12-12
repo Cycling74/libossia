@@ -36,6 +36,11 @@ if(OSSIA_USE_CONAN)
   if(OSSIA_PROTOCOL_MIDI OR NOT OSSIA_SCENARIO_DATAFLOW) #"minimal build" requires midi
     include(deps/libremidi)
   endif()
+
+  set(OSSIA_HAS_FMT 1 CACHE INTERNAL "")
+  set(OSSIA_HAS_CTRE 1 CACHE INTERNAL "")
+  set(OSSIA_HAS_RAPIDFUZZ 1 CACHE INTERNAL "")
+  set(OSSIA_HAS_RE2 1 CACHE INTERNAL "")
 else()
   find_package(Git)
   

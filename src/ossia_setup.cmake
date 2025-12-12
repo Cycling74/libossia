@@ -178,6 +178,12 @@ target_link_libraries(ossia
     spdlog::spdlog
     unordered_dense::unordered_dense
 )
+target_compile_definitions(ossia PUBLIC
+  OSSIA_HAS_FMT=1
+  OSSIA_HAS_CTRE=1
+  OSSIA_HAS_RAPIDFUZZ=1
+  OSSIA_HAS_RE2=1
+)
 else()
 target_link_libraries(ossia
   PRIVATE
