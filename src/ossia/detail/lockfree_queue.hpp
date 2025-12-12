@@ -15,7 +15,7 @@ template <typename T, size_t MAX_BLOCK_SIZE = 512>
 using spsc_queue = moodycamel::ConcurrentQueue<T>;
 }
 #else
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 namespace ossia
 {
 template <typename T, size_t MAX_BLOCK_SIZE = 512>
@@ -23,7 +23,7 @@ using spsc_queue = moodycamel::ReaderWriterQueue<T, MAX_BLOCK_SIZE>;
 }
 #endif
 #else
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 namespace ossia
 {
 template <typename T, size_t MAX_BLOCK_SIZE = 512>

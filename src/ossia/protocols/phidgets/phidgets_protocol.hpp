@@ -6,7 +6,7 @@
 #include <ossia/network/base/protocol.hpp>
 #include <ossia/network/phidgets/phidgets_parameter_data.hpp>
 
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 namespace ossia
 {

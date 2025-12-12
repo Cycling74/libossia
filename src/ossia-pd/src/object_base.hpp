@@ -12,7 +12,7 @@
 extern "C" {
 #include <cicm_wrapper.h>
 }
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 #define OSSIA_PD_MAX_ATTR_SIZE 256
 

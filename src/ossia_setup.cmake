@@ -158,6 +158,27 @@ target_include_directories(ossia
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 
+if(OSSIA_USE_CONAN)
+target_link_libraries(ossia
+  PRIVATE
+    rapidfuzz::rapidfuzz
+  PUBLIC
+    ctre::ctre
+    fmt::fmt
+    nanosignal::nanosignal
+    std::mdspan
+    tuplet::tuplet
+    readerwriterqueue::readerwriterqueue
+    concurrentqueue::concurrentqueue
+    websocketpp::websocketpp
+    rapidjson
+    re2::re2
+    smallfun::smallfun
+    span::span
+    spdlog::spdlog
+    unordered_dense::unordered_dense
+)
+else()
 target_link_libraries(ossia
   PRIVATE
     $<BUILD_INTERFACE:rapidfuzz::rapidfuzz>
@@ -178,6 +199,7 @@ target_link_libraries(ossia
     $<BUILD_INTERFACE:tuplet::tuplet>
     $<BUILD_INTERFACE:unordered_dense::unordered_dense>
 )
+endif()
 
 if(OSSIA_DATAFLOW)
   target_link_libraries(ossia

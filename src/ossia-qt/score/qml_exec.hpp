@@ -7,7 +7,7 @@
 #include <QPointer>
 #include <QQuickItem>
 
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 #include <verdigris>
 namespace ossia

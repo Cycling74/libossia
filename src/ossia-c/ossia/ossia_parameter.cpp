@@ -8,7 +8,7 @@
 #include <ossia/network/base/node_functions.hpp>
 #include <ossia/network/dataspace/dataspace_visitors.hpp>
 
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 extern "C" {
 

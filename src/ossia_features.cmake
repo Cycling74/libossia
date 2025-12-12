@@ -327,6 +327,11 @@ if(OSSIA_DATAFLOW)
 elseif(NOT OSSIA_SCENARIO_DATAFLOW)
   # minimal build
   target_sources(ossia PRIVATE ${OSSIA_EDITOR_HEADERS} ${OSSIA_EDITOR_SRCS})
+  # XXX requires midi
+  target_link_libraries(ossia
+    PUBLIC
+      $<BUILD_INTERFACE:libremidi::libremidi>
+  )
 endif()
 
 set_target_properties(ossia PROPERTIES OSSIA_PROTOCOLS "${OSSIA_PROTOCOLS}")

@@ -5,7 +5,7 @@
 #include <ossia/network/base/parameter_data.hpp>
 #include <ossia/network/base/protocol.hpp>
 
-#include <readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 #include <chrono>
 #include <thread>
