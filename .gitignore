@@ -51,3 +51,6 @@ OSSIA/ossia-node/node_modules
 3rdparty/pure-data/
 build
 .vscode
+
+# conan/cmake
+CMakeUserPresets.json
