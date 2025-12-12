@@ -241,3 +241,8 @@ class LibOssia(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = ["ossia"]
+        if not self.options.shared:
+            self.cpp_info.libdirs = ["lib/static"]
