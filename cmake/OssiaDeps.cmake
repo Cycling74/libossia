@@ -1,19 +1,19 @@
 if(OSSIA_USE_CONAN)
-  find_package(boost REQUIRED)
+  find_package(Boost REQUIRED)
   find_package(concurrentqueue REQUIRED)
   find_package(ctre REQUIRED)
   find_package(fmt REQUIRED)
   find_package(magic_enum REQUIRED)
   find_package(mdspan REQUIRED)
   find_package(rapidfuzz REQUIRED)
-  find_package(rapidjson REQUIRED)
+  find_package(RapidJSON REQUIRED)
   find_package(re2 REQUIRED)
   find_package(readerwriterqueue REQUIRED)
   find_package(spdlog REQUIRED)
   find_package(tuplet REQUIRED)
   find_package(unordered_dense REQUIRED)
 
-  #old
+  #websocketpp is old in conan, custom fork included here
   #find_package(websocketpp REQUIRED)
   include(deps/websocketpp)
 
