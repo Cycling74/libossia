@@ -146,7 +146,7 @@ class LibOssia(ConanFile):
         self.requires("concurrentqueue/1.0.4")
         self.requires("ctre/3.10.0")
         self.requires("dr_libs/cci.20230529")
-        self.requires("fmt/12.0.0")
+        self.requires("fmt/12.0.0", transitive_headers=True, transitive_libs=True)
         self.requires("rapidfuzz/3.1.1")
         #bug: https://github.com/Tencent/rapidjson/issues/2277
         #self.requires("rapidjson/1.1.0")
