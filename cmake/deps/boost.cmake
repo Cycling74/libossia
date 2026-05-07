@@ -1,5 +1,6 @@
-set(BOOST_MINOR_MINIMAL 67)
-set(BOOST_MINOR_LATEST 80)
+set(BOOST_MINOR_MINIMAL 86)
+set(BOOST_MINOR_LATEST 90)
+set(BOOST_MINOR_CONAN 86)
 
 if(OSSIA_USE_CONAN)
   if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
@@ -14,7 +15,7 @@ if(OSSIA_USE_CONAN)
 
   set(CONAN_PROFILE "default" CACHE STRING "The profile to use for building conan deps, useful for cross compiling")
   conan_cmake_configure(
-    REQUIRES boost/1.${BOOST_MINOR_LATEST}.0
+    REQUIRES boost/1.${BOOST_MINOR_CONAN}.0
     GENERATORS cmake_find_package
     OPTIONS
       boost:shared=False
@@ -33,7 +34,7 @@ if(OSSIA_USE_CONAN)
     PROFILE_HOST ${CONAN_PROFILE}
     PROFILE_BUILD default
   )
-  find_package(Boost 1.${BOOST_MINOR_LATEST} REQUIRED GLOBAL)
+  find_package(Boost 1.${BOOST_MINOR_CONAN} REQUIRED GLOBAL)
   if(BOOST_ROOT)
     set(Boost_INCLUDE_DIR "${BOOST_ROOT}" CACHE INTERNAL "")
   endif()
