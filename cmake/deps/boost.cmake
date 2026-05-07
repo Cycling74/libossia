@@ -1,5 +1,47 @@
-set(BOOST_MINOR_MINIMAL 87)
-set(BOOST_MINOR_LATEST 90)
+set(BOOST_MINOR_MINIMAL 67)
+set(BOOST_MINOR_LATEST 80)
+
+if(OSSIA_USE_CONAN)
+  if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
+      "${CMAKE_BINARY_DIR}/conan.cmake")
+  endif()
+  include(${CMAKE_BINARY_DIR}/conan.cmake)
+  conan_check(VERSION 1.29.0 REQUIRED)
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+  list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+
+  set(CONAN_PROFILE "default" CACHE STRING "The profile to use for building conan deps, useful for cross compiling")
+  conan_cmake_configure(
+    REQUIRES boost/1.${BOOST_MINOR_LATEST}.0
+    GENERATORS cmake_find_package
+    OPTIONS
+      boost:shared=False
+      boost:without_stacktrace=True
+      boost:without_context=True
+      boost:without_coroutine=True
+      boost:without_fiber=True
+      boost:without_locale=True
+      boost:without_log=True
+  )
+  conan_cmake_install(
+    PATH_OR_REFERENCE .
+    BUILD missing
+    SETTINGS_HOST build_type=${CMAKE_BUILD_TYPE}
+    SETTINGS_BUILD build_type=${CMAKE_BUILD_TYPE}
+    PROFILE_HOST ${CONAN_PROFILE}
+    PROFILE_BUILD default
+  )
+  find_package(Boost 1.${BOOST_MINOR_LATEST} REQUIRED GLOBAL)
+  if(BOOST_ROOT)
+    set(Boost_INCLUDE_DIR "${BOOST_ROOT}" CACHE INTERNAL "")
+  endif()
+  add_library(boost INTERFACE IMPORTED GLOBAL)
+  set_property(TARGET boost PROPERTY
+               INTERFACE_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
+  return()
+endif()
 
 unset(BOOST_VERSIONS_LIST)
 set(current_val ${BOOST_MINOR_LATEST})

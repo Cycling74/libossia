@@ -86,6 +86,7 @@ endif()
 
 # Download various dependencies
 include(deps/abseil)
+set(OSSIA_USE_CONAN True CACHE BOOL "Use conan to install boost")
 include(deps/boost)
 include(deps/concurrentqueue)
 include(deps/ctre)
