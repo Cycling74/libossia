@@ -42,6 +42,10 @@ class LibossiaConan(ConanFile):
         #submodules are updated while exporting source
         cmake.definitions["OSSIA_SUBMODULE_AUTOUPDATE"] = False
 
+        #boost comes from conan when we are being built as a conan package.
+        #the cmake default is OFF so that plain cmake builds don't need conan.
+        cmake.definitions["OSSIA_USE_CONAN"] = True
+
         #configurables
         cmake.definitions["OSSIA_STATIC"] = not self.options.shared
 

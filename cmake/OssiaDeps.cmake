@@ -86,7 +86,9 @@ endif()
 
 # Download various dependencies
 include(deps/abseil)
-set(OSSIA_USE_CONAN True CACHE BOOL "Use conan to install boost")
+# Off by default so a plain cmake build never requires conan to be installed;
+# conanfile.py turns it on when libossia is built as a conan package.
+set(OSSIA_USE_CONAN False CACHE BOOL "Use conan to install boost")
 include(deps/boost)
 include(deps/concurrentqueue)
 include(deps/ctre)
