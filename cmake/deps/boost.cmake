@@ -14,17 +14,15 @@ if(OSSIA_USE_CONAN)
   list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
   set(CONAN_PROFILE "default" CACHE STRING "The profile to use for building conan deps, useful for cross compiling")
+  # ossia consumes boost header-only: ossia_setup.cmake defines BOOST_ALL_NO_LIB=1
+  # and no compiled boost library is ever linked. Asking conan for the header-only
+  # package means nothing gets built, and the recipe clears package_id(), so one
+  # architecture-independent package serves every target, cross builds included.
   conan_cmake_configure(
     REQUIRES boost/1.${BOOST_MINOR_CONAN}.0
     GENERATORS cmake_find_package
     OPTIONS
-      boost:shared=False
-      boost:without_stacktrace=True
-      boost:without_context=True
-      boost:without_coroutine=True
-      boost:without_fiber=True
-      boost:without_locale=True
-      boost:without_log=True
+      boost:header_only=True
   )
   conan_cmake_install(
     PATH_OR_REFERENCE .
