@@ -96,5 +96,14 @@ class LibossiaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib", "lib/static"]
-        self.cpp_info.libs = tools.collect_libs(self)
+        libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            # We ship ~88 abseil archives alongside libossia.a, and collect_libs()
+            # returns them alphabetically with libossia.a last. GNU ld scans each
+            # archive exactly once, left to right, so absl's internal dependencies
+            # never resolve: libabsl_synchronization.a needs libabsl_base.a, which
+            # ld has already walked past. Wrap the whole set in a linker group so
+            # ld iterates to closure instead of depending on the order.
+            libs = ["-Wl,--start-group"] + libs + ["-Wl,--end-group"]
+        self.cpp_info.libs = libs
         self.cpp_info.includedirs = ["include"]
